@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  minio:
+    container_name: minio-local
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"  # MinIO API
+      - "9001:9001"  # MinIO Console UI
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: "secret*098"
+      MINIO_ACCESS_KEY: "root"
+      MINIO_SECRET_KEY: "secret*098"
+    volumes:
+      - minio-data:/data
+    command: server --console-address ":9001" /data
+    restart: unless-stopped
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      /usr/bin/mc alias set myminio http://minio:9000 root secret*098;
+      /usr/bin/mc mb myminio/silog;
+      /usr/bin/mc anonymous set public myminio/silog;
+      exit 0;
+      "
+
+volumes:
+  minio-data:

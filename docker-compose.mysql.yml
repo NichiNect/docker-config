@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+    mysql-local:
+        container_name: 'mysql-local' 
+        image: 'mysql/mysql-server:latest'
+        ports:
+            - '3306:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: 'rootPassword*01'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: 'testing_db'
+            MYSQL_USER: 'mysqluser'
+            MYSQL_PASSWORD: 'secret*098'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - 'msyqlvol:/var/lib/mysql'
+            - './mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p rootPassword*01'
+            retries: 3
+            timeout: 5s
+volumes:
+    msyqlvol:
+        driver: local
